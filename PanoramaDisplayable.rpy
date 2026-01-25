@@ -93,7 +93,7 @@ init python:
 
     import pygame
     from operator import sub, add, mul, mod
-    from math import dist
+    from math import dist, pi, cos
     from renpy.uguu import GL_REPEAT, GL_NEAREST
 
     class Panorama(renpy.Displayable):
@@ -105,7 +105,22 @@ init python:
                 callback = None, screen:str = None,
                 speed:tuple = (0.2,0.2), frame_clamp:float = 0, zoom:float = 1
                 ):
+            """
+            Panorama displayable
 
+            background - Name of background layer image;
+            targets - Dictionary of targets format - {Target_Name : Target_Coord.X, Target_Coord.Y, Target_Width, Target_Height};
+            layer_1 - Name of layer 1 image (include extension);
+            layer_2 - Name of layer 2 image (include extension);
+            alpha_1 - Opacity of layer 1 on startup;
+            alpha_2 - Opacity of layer 2 on startup;
+            offset - Coordinate where player is looking at creation of displayable (0 or 1 on X are on the edge of the image, 0.5 on Y is looking at middle of the image);
+            callback - Function to call when any active target is hit;
+            screen - Name of a screen to be passed to the callback function. Use to track the parent of the displayable;
+            speed - How fast the mouse moves the screen. Separate for X and Y. Default - (0.2, 0.2);
+            frame_clamp - The maximum movement a mouse can do per frame ignore if 0;
+            zoom - Zoom in or out to panorama. 1 - default zoom. < 1 zooms in, > 1 zooms out. Negative values invert the image;
+            """
             renpy.Displayable.__init__(self)
             # self.background:str         = background
             self.background = renpy.displayable(background)
@@ -122,7 +137,6 @@ init python:
             self.frame_clamp:float      = frame_clamp  # Used to clamp maximum frame rotation after speed is applied
             self.zoom:float             = zoom
 
-
             
             self.targets:dict           = {}
             # Calculate target bounds and remake targets 
@@ -134,15 +148,9 @@ init python:
                 max_corner = tuple(map(add, t_coord, bbox_range))
                 self.targets[name] = [t_coord, min_corner, max_corner, (value[2], value[3]), value[4]]
 
-
-
             self.callback:function      = callback
             self.screen:str             = screen
 
-            self.DEBUG:int              = 1
-            self.DEBUG_TARGET:str       = "Target_0"
-
-            # Debug Mode
             self.is_dragging:bool       = False
             self.last_mouse_pos:tuple   = (0.,0.)
             
@@ -153,6 +161,10 @@ init python:
             self.anim_start_pos:tuple   = (0,0)
             
             self.interactable           = True
+
+            # Debug Mode
+            self.DEBUG:int              = 1
+            self.DEBUG_TARGET:str       = "Target_0"
             pass
 
 
@@ -214,7 +226,8 @@ init python:
                 progress = min(elapsed / self.anim_duration, 1.0)
 
                 # Smoothstep makes the movement start and end soft
-                t = progress * progress * (3.0 - 2.0 * progress)
+                # t = progress * progress * (3.0 - 2.0 * progress)
+                t = cos((progress + 1) * pi) * 0.5 + 0.5
 
                 # Interpolate X and Y
                 new_x = self.anim_start_pos[0] + (self.anim_target[0] - self.anim_start_pos[0]) * t
@@ -222,6 +235,7 @@ init python:
 
                 self.offset = (new_x, new_y)
 
+                # If animation finished
                 if t == 1:
                     self.animated = False
                     self.interactable = True
@@ -292,8 +306,10 @@ init python:
         def set_taget_status(self, target:str, new_status:bool):
             """
             Set active status of a particular target
+            
+            target - Target Name;
+            new_status - Activity Status;
             """
-
             target_value = self.targets[target]
             self.targets.update({target: (target_value[0], target_value[1], target_value[2], target_value[3], new_status)})
             pass
@@ -302,13 +318,17 @@ init python:
         def set_callback(self, callback):
             """
             Set callback function from outside
+
+            callback - new callback function;
             """            
-            
             self.callback = callback
 
         def anim_to_target(self, target:str, total_time:float):
             """
             Start animation from outside
+
+            target - name of target to animate to;
+            total_time - duration of animation;
             """
             self.animated = True
             self.interactable = False
@@ -321,6 +341,9 @@ init python:
         def set_layer_alpha(self, layer:int, alpha:float):
             """
             Set Specific layer opacity
+
+            layer - number of layer to edit
+            alpha - opacity value for the layer
             """
             self.alpha[layer] = alpha
             pass
