@@ -41,13 +41,11 @@ init python:
         vec4 col = texture2D(background, sphere_uv, 0.).rgba;
 
         vec4 col_1 = texture2D(layer_1, sphere_uv, 0.).rgba;
-        if (col_1.a > 0.95){
-            col.rgb = mix(col.rgb, col_1.rgb, clamp(layer_1_opacity,0.,1.));
-        }
-        vec4 col_2 = texture2D(layer_2, sphere_uv, 0.).rgba;
-        if (col_2.a > 0.95){
-            col.rgb = mix(col.rgb, col_2.rgb, clamp(layer_2_opacity,0.,1.));
-        }
+        col.rgb = mix(col.rgb, col_1.rgb, clamp(layer_1_opacity * col_1.a,0.,1.));
+        
+        vec4 col_2 = texture2D(layer_2, sphere_uv, 0.).rgba;        
+        col.rgb = mix(col.rgb, col_2.rgb, clamp(layer_2_opacity * col_2.a,0.,1.));
+
 
         if (debug == 1) {       
             // Draw Square on Sphere UV
@@ -156,7 +154,7 @@ init python:
             
             self.animated:bool          = False
             self.anim_duration:float    = 2.
-            self.anim_target:tuple      = self.targets["Target_1"][0]
+            self.anim_target:tuple      = (0,0)
             self.anim_start:float       = None
             self.anim_start_pos:tuple   = (0,0)
             
@@ -164,7 +162,8 @@ init python:
 
             # Debug Mode
             self.DEBUG:int              = 1
-            self.DEBUG_TARGET:str       = "Target_0"
+            self.DEBUG_TARGET:int       = "Target_50"
+            self.debug_validate()
             pass
 
 
@@ -323,6 +322,7 @@ init python:
             """            
             self.callback = callback
 
+
         def anim_to_target(self, target:str, total_time:float):
             """
             Start animation from outside
@@ -349,4 +349,8 @@ init python:
             pass
 
 
+        def debug_validate(self):
             
+            if self.DEBUG_TARGET not in self.targets.keys():
+                keys = list(self.targets.keys())
+                self.DEBUG_TARGET = keys[0]
