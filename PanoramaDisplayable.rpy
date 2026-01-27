@@ -104,20 +104,33 @@ init python:
                 speed:tuple = (0.2,0.2), frame_clamp:float = 0, zoom:float = 1
                 ):
             """
-            Panorama displayable
+            # Panorama displayable
 
-            background - Name of background layer image;
-            targets - Dictionary of targets format - {Target_Name : Target_Coord.X, Target_Coord.Y, Target_Width, Target_Height};
-            layer_1 - Name of layer 1 image (include extension);
-            layer_2 - Name of layer 2 image (include extension);
-            alpha_1 - Opacity of layer 1 on startup;
-            alpha_2 - Opacity of layer 2 on startup;
-            offset - Coordinate where player is looking at creation of displayable (0 or 1 on X are on the edge of the image, 0.5 on Y is looking at middle of the image);
-            callback - Function to call when any active target is hit;
-            screen - Name of a screen to be passed to the callback function. Use to track the parent of the displayable;
-            speed - How fast the mouse moves the screen. Separate for X and Y. Default - (0.2, 0.2);
-            frame_clamp - The maximum movement a mouse can do per frame ignore if 0;
-            zoom - Zoom in or out to panorama. 1 - default zoom. < 1 zooms in, > 1 zooms out. Negative values invert the image;
+            ## Args:
+                background (str)    : Name of background layer image.
+                targets (dict)      : Dictionary of targets format - {Target_Name : Target_Coord.X, Target_Coord.Y, Target_Width, Target_Height}.
+                layer_1 (str)       : Name of layer 1 image (include extension).
+                layer_2 (str)       : Name of layer 2 image (include extension).
+                alpha_1 (float)     : Opacity of layer 1 on startup.
+                alpha_2 (float)     : Opacity of layer 2 on startup.
+                offset (tuple)      : Coordinate where player is looking at creation of displayable (0 or 1 on X are on the edge of the image, 0.5 on Y is looking at middle of the image).
+                callback (function) : Function to call when any active target is hit.
+                screen (str)        : Name of a screen to be passed to the callback function. Use to track the parent of the displayable.
+                speed (tuple)       : How fast the mouse moves the screen. Separate for X and Y. Default - (0.2, 0.2).
+                frame_clamp (float) : The maximum movement a mouse can do per frame ignore if 0.
+                zoom (float)        : Zoom in or out to panorama. 1 - default zoom. < 1 zooms in, > 1 zooms out. Negative values invert the image.
+
+
+            ## Output:
+                When a target is hit the callback function runs with a dictionary as parameter.
+                The dictionary is layed out like this:
+                {       
+                    "self":         Reference to the Panorama Displayable that ran the function,
+                    "screen":       (str) Name of the screen that was given to the Displayable,
+                    "target":       (str) Name of the hit target,
+                    "direction":    (bool) Diretion that the target was hit from. False - Left, True - Right,
+                    "offset":       (tuple) the coordinate at which the target was hit
+                }
             """
             renpy.Displayable.__init__(self)
             # self.background:str         = background
