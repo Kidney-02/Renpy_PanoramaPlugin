@@ -175,7 +175,7 @@ init python:
             self.interactable           = True
 
             # Debug Mode
-            self.DEBUG:int              = 1
+            self.DEBUG:int              = 0
             self.DEBUG_TARGET:int       = "Target_50"
             self._debug_validate()
             pass
