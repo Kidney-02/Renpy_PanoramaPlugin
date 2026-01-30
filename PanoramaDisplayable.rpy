@@ -96,11 +96,11 @@ init python:
 
     class Panorama(renpy.Displayable):
 
-        def __init__(self, background:str, targets:dict,
+        def __init__(self, background:str, targets:dict = None,
                 layer_1:str = None, layer_2:str = None,
                 alpha_1:float = 0., alpha_2:float = 0., 
                 offset:tuple = (0.0,0.5),
-                callback = None, screen:str = None,
+                callback = None, screen:str = "",
                 speed:tuple = (0.2,0.2), frame_clamp:float = 0, zoom:float = 1
                 ):
             """
@@ -140,8 +140,8 @@ init python:
             self.alpha = [0] * 2
             self.layer[0] = renpy.displayable(layer_1) if layer_1 is not None else self.background
             self.layer[1] = renpy.displayable(layer_2) if layer_2 is not None else self.background
-            self.alpha[0]:float = alpha_1
-            self.alpha[1]:float = alpha_2
+            self.alpha[0]:float = alpha_1 if layer_1 is not None else 0.
+            self.alpha[1]:float = alpha_2 if layer_2 is not None else 0.
 
             self.offset:tuple           = offset
             self.speed:tuple            = speed
@@ -152,12 +152,13 @@ init python:
             self.targets:dict           = {}
             # Calculate target bounds and remake targets 
             # dict {name: [0]target, [1]bounds_min, [2]bounds_max, [3]Old_Range, [4]active_status}
-            for name, value in targets.items():
-                t_coord = (value[0],  value[1])
-                bbox_range = (value[2] * 0.5,  value[3] * 0.5)
-                min_corner = tuple(map(sub, t_coord, bbox_range))
-                max_corner = tuple(map(add, t_coord, bbox_range))
-                self.targets[name] = [t_coord, min_corner, max_corner, (value[2], value[3]), value[4]]
+            if targets is not None: 
+                for name, value in targets.items():
+                    t_coord = (value[0],  value[1])
+                    bbox_range = (value[2] * 0.5,  value[3] * 0.5)
+                    min_corner = tuple(map(sub, t_coord, bbox_range))
+                    max_corner = tuple(map(add, t_coord, bbox_range))
+                    self.targets[name] = [t_coord, min_corner, max_corner, (value[2], value[3]), value[4]]
 
             self.callback:function      = callback
             self.screen:str             = screen
@@ -237,7 +238,7 @@ init python:
                 elapsed = st - self.anim_start
                 progress = min(elapsed / self.anim_duration, 1.0)
 
-                # Smoothstep makes the movement start and end soft
+                # Animation smoothing
                 # t = progress * progress * (3.0 - 2.0 * progress)
                 t = cos((progress + 1) * pi) * 0.5 + 0.5
 
