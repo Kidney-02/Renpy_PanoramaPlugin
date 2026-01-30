@@ -123,7 +123,7 @@ init python:
 
             ## Output:
                 When a target is hit the callback function runs with a dictionary as parameter.
-                The dictionary is layed out like this:
+                The dictionary is laid out like this:
                 {       
                     "self":         Reference to the Panorama Displayable that ran the function,
                     "screen":       (str) Name of the screen that was given to the Displayable,
@@ -177,7 +177,7 @@ init python:
             # Debug Mode
             self.DEBUG:int              = 1
             self.DEBUG_TARGET:int       = "Target_50"
-            self.debug_validate()
+            self._debug_validate()
             pass
 
 
@@ -186,7 +186,7 @@ init python:
             # Update logic happens here (Avoids rubberbanding that happens in def event())
             if self.is_dragging and not self.animated:
                 # Mouse drag logic
-                mouse_pos = self.calc_mouse_pos()
+                mouse_pos = self._calc_mouse_pos()
                 delta = tuple(map(sub, mouse_pos, self.last_mouse_pos))
                 scaled_delta = tuple(map(mul, delta, self.speed))
                 
@@ -297,7 +297,7 @@ init python:
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 self.is_dragging = True
                
-                self.last_mouse_pos = self.calc_mouse_pos()
+                self.last_mouse_pos = self._calc_mouse_pos()
                 # renpy.redraw(self, 0)
                 raise renpy.display.core.IgnoreEvent()
 
@@ -305,7 +305,7 @@ init python:
                 self.is_dragging = False
 
 
-        def calc_mouse_pos(self) -> tuple:
+        def _calc_mouse_pos(self) -> tuple:
             """
             Calculate mouse position relative to the game screen
             """
@@ -316,6 +316,13 @@ init python:
             return mouse_pos
 
 
+        def _debug_validate(self):    
+            if self.DEBUG_TARGET not in self.targets.keys():
+                keys = list(self.targets.keys())
+                self.DEBUG_TARGET = keys[0]
+
+
+########### Functions to call from outside #############
         def set_taget_status(self, target:str, new_status:bool):
             """
             Set active status of a particular target
@@ -363,8 +370,3 @@ init python:
             pass
 
 
-        def debug_validate(self):
-            
-            if self.DEBUG_TARGET not in self.targets.keys():
-                keys = list(self.targets.keys())
-                self.DEBUG_TARGET = keys[0]
