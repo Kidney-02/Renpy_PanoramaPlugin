@@ -5,7 +5,6 @@ Each displayable supports a background and 2 extra layers.
 Each displayable can have multiple targets and if player looks at them a callback function wil be called.
 
 
-
 Created by Kidney <br>
 Github: https://github.com/Kidney-02/Renpy_PanoramaPlugin
 
@@ -49,7 +48,14 @@ screen test_screen():
 This creates a screen that will pause the dialogue while it's shown. 
 To turn it off add buttons to the screen or add the functionality to the callback function.
 
-You must input a background image, without it the displayable will fail to function.
+> You must input a background image, without it the displayable will fail to function.
+
+There are other [parameters](#parameters) that can be input during creation:
+- offset: X and Y coordinate that player will be looking at when panorama is first displayed.
+- speed: X and Y speed the panorama moves when dragged. Can be input as tuple (x,y) or as a float, in which case both axis will have the same speed.
+- frame_clamp: maximum distance panorama can be moved per render frame. Ignored if set to 0. Can be input as tuple or float. This value is applied after speed. Use this sparingly since it will make the game feel unresponsive or laggy.
+- zoom: Zoom in and out of the panorama image. Default value is 1, < 1 zooms in, > 1 zooms out. Values under 0 invert the image and 0 zooms in to a single pixel. When adjusting zoom keep in mind that it will feel faster when zoomed in and slower zoomed out. Extreme values will distort the image.
+
 
 ### **Targets**
 
@@ -111,29 +117,6 @@ def example_function(args:dict):
 
 *Self* reference is important here as it can be used to change behaviour of the displayable. There are four functions that can be called to do this:
 
-> set_taget_status(target, new_status)
-
-Sets active status of any target already assigned to the displayable. Use this to disable targets after interaction or enable new targets.
-- target - Name of the target to change active status of.
-- new_status - Active status of the target.
-
-> set_callback(callback)
-
-Change the callback function to be called on target hit.
-- callback - new callback function.
-
-> anim_to_target(target, total_time)
-
-Animate to a named target. Mouse interaction is disabled during the animation and won't restart until player clicks again.
-- target: Name of the target to animate to.
-- total_time: Time in seconds, how long the animation will last.
-
-> set_layer_alpha(layer, alpha)
-
-Set Opacity of a layer.
-- layer: Index of layer starting 0. Can be either 0 or 1.
-- alpha: Opacty value between 0 and 1 as.
-
 
 Example implementation:
 ```
@@ -181,11 +164,28 @@ As you can see you can call more than the displayable functions. Check out what 
 
 ### **Debug**
 
-Debug modes
+To preview Targets use Debug mode. Debug mode is global and applies to all displayables to make sure one is not accidentaly forgotten and left on in the published game. To use Debug mode open the *PanoramaDisplayable.rpy* file and find the lines bellow at the top of the file:
+```
+    DEBUG_MODE          = 0
+    DEBUG_TARGET        = ""
+```
+There are 4 debug modes:
+
+0. Debug Disabled
+1. Show targets on sphere srojection. The background image and layers will be shown as normal and target bounds will be drawn on top.
+2. Show targets in screen coordinates overalyed on panoramic image.  The background image and layers will be shown as normal, but the target and the player view offset will be shown in screen coordinates.
+3. Show targets and background image in screen coordinates. The background will be layed out flat in screen coordinates and taget and view offset drawn on top.
+
+Debug Target is the name of the target o be drawn. Only one target can be visualized at once. If a displayable doesnt have a target with the specified name, debug mode will be disabled for that displayable.
+
+> Do not forget to disable DEBUG_MODE before publishing the game
 
 ### **Layers**
 
-How to use layers
+Each displayable can have up to two layers. Set the images at creation using *layer_1* and *layer_2* [parameters](#parameters). These images will be projected on a sphere the same way as the background with the same coordinates, so they should be the same resolution (But don't have to be if aligned in some way).
+
+Opacity is set to 0 by default but can be adjusted using *alpha_1* and *alpha_2* parameters at creation. Opacity can be set after creation using *set_layer_alpha()* [function](#functions). 
+
 
 ## **Parameters**
 
@@ -203,18 +203,37 @@ How to use layers
 - zoom (float)        : Zoom in or out to panorama. 1 - default zoom. < 1 zooms in, > 1 zooms out. Negative values invert the image.
 
 
+## **Functions**
+
+> set_taget_status(target, new_status)
+
+Sets active status of any target already assigned to the displayable. Use this to disable targets after interaction or enable new targets.
+- target - Name of the target to change active status of.
+- new_status - Active status of the target.
+
+> set_callback(callback)
+
+Change the callback function to be called on target hit.
+- callback - new callback function.
+
+> anim_to_target(target, total_time)
+
+Animate to a named target. Mouse interaction is disabled during the animation and won't restart until player clicks again.
+- target: Name of the target to animate to.
+- total_time: Time in seconds, how long the animation will last.
+
+> set_layer_alpha(layer, alpha)
+
+Set Opacity of a layer.
+- layer: Index of layer starting 0. Can be either 0 or 1.
+- alpha: Opacty value between 0 and 1 as.
+
+
+
 ## **Notes**
 
-`inline code`
+I was inspired to create this by a [video by Dungeon Chill](https://www.youtube.com/watch?v=TMrL8nKJGQw&pp=ygUNZHVuZ2VvbiBjaGlsbNgG7yk%3D).
 
-```
-Long Code
-Add More Code here
-```
+[Moon Shader by pke1029](https://pke1029.itch.io/moon-shader) on itch.io really helpful for creating this plugin. 
 
->   asca
->ascac
->acasca
-
-
-
+This has been my first project in renpy or with shaders, so if you notice any bugs feel free to mention.
