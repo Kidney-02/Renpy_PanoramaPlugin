@@ -3,7 +3,7 @@ init python:
     #########################   DEBUG MODE   ##############################
     """
     Debug modes:
-        0 - Debug mode disabled .
+        0 - Debug mode disabled.
         1 - Show targets on sphere srojection.
         2 - Show targets in screen coordinates overalyed on panoramic image.
         3 - Show targets and background image in screen coordinates.
@@ -116,10 +116,13 @@ init python:
                 scaled_delta = tuple(map(mul, delta, self.speed))
                 
                 # Clamp frame delta
-                if self.frame_clamp is not (0.,0.):
+                if self.frame_clamp[0] is not 0.:
                     scaled_delta_x = max(min(scaled_delta[0], self.frame_clamp[0]), -self.frame_clamp[0])
+                    scaled_delta = (scaled_delta_x,scaled_delta[1])
+                if self.frame_clamp[1] is not 0.:
                     scaled_delta_y = max(min(scaled_delta[1], self.frame_clamp[1]), -self.frame_clamp[1])
-                    scaled_delta = (scaled_delta_x,scaled_delta_y)
+                    scaled_delta = (scaled_delta[0],scaled_delta_y)
+                
                 
                 new_x = ((self.offset[0] + scaled_delta[0]) + 1 ) % 1.0
                 new_y = max(min(self.offset[1] + scaled_delta[1], 0.95), 0.05)                

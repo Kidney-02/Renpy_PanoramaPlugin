@@ -127,7 +127,7 @@ screen test_screen():
         targets = {
             "Target_0": (0.1, 0.6, 0.12, 0.08, True),
             "Target_1": (0.5, 0.2, 0.1, 0.15, False),
-            "Target_2": (0.8, 0.8, 0.1, 0.15, False)
+            "Target_2": (0.8, 0.8, 0.1, 0.15, False),
             "Target_1": (0.7, 0.3, 0.06, 0.1, False),
             },
         screen="test_screen", callback=testcallback)
