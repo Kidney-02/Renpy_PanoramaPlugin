@@ -88,9 +88,12 @@ init python:
             self.callback:function      = callback
             self.screen:str             = screen
 
+            # Movement Params
             self.is_dragging:bool       = False
             self.last_mouse_pos:tuple   = (0.,0.)
-            
+            self.last_st                = 0
+
+            # Anim Params
             self.animated:bool          = False
             self.anim_duration:float    = 2.
             self.anim_target:tuple      = (0,0)
@@ -107,56 +110,9 @@ init python:
             
 
         def render(self, width, height, st, at):
+            
 
-            # Update logic happens here (Avoids rubberbanding that happens in def event())
-            if self.is_dragging and not self.animated:
-                # Mouse drag logic
-                mouse_pos = self._calc_mouse_pos()
-                delta = tuple(map(sub, mouse_pos, self.last_mouse_pos))
-                scaled_delta = tuple(map(mul, delta, self.speed))
-                
-                # Clamp frame delta
-                if self.frame_clamp[0] is not 0.:
-                    scaled_delta_x = max(min(scaled_delta[0], self.frame_clamp[0]), -self.frame_clamp[0])
-                    scaled_delta = (scaled_delta_x,scaled_delta[1])
-                if self.frame_clamp[1] is not 0.:
-                    scaled_delta_y = max(min(scaled_delta[1], self.frame_clamp[1]), -self.frame_clamp[1])
-                    scaled_delta = (scaled_delta[0],scaled_delta_y)
-                
-                
-                new_x = ((self.offset[0] + scaled_delta[0]) + 1 ) % 1.0
-                new_y = max(min(self.offset[1] + scaled_delta[1], 0.95), 0.05)                
-                
-                self.offset = (new_x, new_y)
-
-                # Rect Test
-                for name, value in self.targets.items():
-                    if value[4] is not True:
-                        continue
-                    target = value[0]
-                    bbox_min = value[1]
-                    bbox_max = value[2]
-
-                    # Check if offset is in bounds           
-                    if all(map(lambda a, b: a > b,self.offset,bbox_min)) and all(map(lambda a, b: a < b,self.offset,bbox_max)):
-                        # Check if entered bbox from left or right
-                        # True if Right, False if Left 
-                        direction = True if self.offset[0] < target[0] else False
-
-                        # self.is_dragging = False
-                        if self.callback is not None:
-                            self.callback({
-                                "self": self,
-                                "screen": self.screen,
-                                "target": name,
-                                "direction": direction,
-                                "offset": self.offset
-                            })
-
-                # Sync mouse position
-                self.last_mouse_pos = mouse_pos
-
-            elif not self.is_dragging and self.animated:
+            if not self.is_dragging and self.animated:
                 # Animation logic
                 if self.anim_start is None:
                     self.anim_start = st
@@ -217,7 +173,7 @@ init python:
 
         def event(self, ev, x, y, st):
             """
-            Process mouse click events
+            Process mouse clicks and moves
             """
             if self.interactable == False:
                 return
@@ -231,6 +187,57 @@ init python:
 
             elif ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 self.is_dragging = False
+
+            
+            if self.is_dragging and not self.animated:
+                # Mouse drag logic
+                mouse_pos = self._calc_mouse_pos()
+                delta = tuple(map(sub, mouse_pos, self.last_mouse_pos))
+                scaled_delta = tuple(map(mul, delta, self.speed))
+                
+                # Clamp frame delta
+                if self.frame_clamp[0] is not 0.:
+                    scaled_delta_x = max(min(scaled_delta[0], self.frame_clamp[0]), -self.frame_clamp[0])
+                    scaled_delta = (scaled_delta_x,scaled_delta[1])
+                if self.frame_clamp[1] is not 0.:
+                    scaled_delta_y = max(min(scaled_delta[1], self.frame_clamp[1]), -self.frame_clamp[1])
+                    scaled_delta = (scaled_delta[0],scaled_delta_y)
+                
+                
+                new_x = ((self.offset[0] + scaled_delta[0]) + 1 ) % 1.0
+                new_y = max(min(self.offset[1] + scaled_delta[1], 0.95), 0.05)                
+                
+                self.offset = (new_x, new_y)
+
+                # Rect Test
+                for name, value in self.targets.items():
+                    if value[4] is not True:
+                        continue
+                    target = value[0]
+                    bbox_min = value[1]
+                    bbox_max = value[2]
+
+                    # Check if offset is in bounds           
+                    if all(map(lambda a, b: a > b,self.offset,bbox_min)) and all(map(lambda a, b: a < b,self.offset,bbox_max)):
+                        # Check if entered bbox from left or right
+                        # True if Right, False if Left 
+                        direction = True if self.offset[0] < target[0] else False
+
+                        # self.is_dragging = False
+                        if self.callback is not None:
+                            self.callback({
+                                "self": self,
+                                "screen": self.screen,
+                                "target": name,
+                                "direction": direction,
+                                "offset": self.offset
+                            })
+                        anim_to_target(name, 1.)
+                        return
+
+
+                # Sync mouse position
+                self.last_mouse_pos = mouse_pos
 
 
         def _calc_mouse_pos(self) -> tuple:

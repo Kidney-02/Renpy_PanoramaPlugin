@@ -4,9 +4,9 @@ This is a renpy plugin that can display and move around a 360 panoramic image. M
 Each displayable supports a background and 2 extra layers.
 Each displayable can have multiple targets and if player looks at them a callback function wil be called.
 
+Unfortunately I can't find a way to react in any way otehr than turning off the screen this displayable is on. Everything else throws an exception: Cannot start an interaction in the middle of an interaction, without creating a new context. I can create a new Label that can show text, but it hides the displayable or resets it ect. 
+I made this for fun, so I'm giving up for now...
 
-Created by Kidney <br>
-Github: https://github.com/Kidney-02/Renpy_PanoramaPlugin
 
 
 ## **Installation**
